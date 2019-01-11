@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 public interface VNode<T> extends V<T> {
 
     @Nonnull
-    Symbol _feature();
+    Symbol _symbol();
 
     @Nullable
     VNode<T> _low();

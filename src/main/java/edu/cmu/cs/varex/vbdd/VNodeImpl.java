@@ -23,7 +23,7 @@ public class VNodeImpl<T> implements VNode<T> {
     }
 
     @Override
-    public Symbol _feature() {
+    public Symbol _symbol() {
         return symbol;
     }
 
@@ -164,7 +164,7 @@ public class VNodeImpl<T> implements VNode<T> {
             if (b._isValue())
                 result.append(Math.abs(b.hashCode()) + " [shape=box, label=\"" + ((VValue<T>) b)._value() + "\", style=filled, shape=box, height=0.3];");
             else
-                result.append(Math.abs(b.hashCode()) + " [label=\"" + b._feature().getName() + "\"];");
+                result.append(Math.abs(b.hashCode()) + " [label=\"" + b._symbol().getName() + "\"];");
             if (b._low() != null) {
                 result.append(Math.abs(b.hashCode()) + " -> " + Math.abs(b._low().hashCode()) + " [style=dotted];");
             }

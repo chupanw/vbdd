@@ -207,7 +207,7 @@ public class VBDDFactory {
         VNode<U> newNode =
                 vbdd._isValue() ?
                         f.apply((VValue<T>) vbdd) :
-                        VBDDFactory.mk(vbdd._feature(), _mapValue(vbdd._low(), f, rewritten), _mapValue(vbdd._high(), f, rewritten));
+                        VBDDFactory.mk(vbdd._symbol(), _mapValue(vbdd._low(), f, rewritten), _mapValue(vbdd._high(), f, rewritten));
         rewritten.put(vbdd, newNode);
         return newNode;
     }
@@ -237,10 +237,86 @@ public class VBDDFactory {
     }
 
 
+    //    def apply[A, B, C](op: (VValue[A], VValue[B]) => VValue[C], left: VNode[A], right: VNode[B]): VNode[C] = {
+//        var cache: Map[(VNode[A], VNode[B]), VNode[C]] = Map()
+//
+//        def app(u1: VNode[A], u2: VNode[B]): VNode[C] = {
+//                val cached = cache.get((u1, u2))
+//        if (cached.nonEmpty)
+//            return cached.get
+//
+//        val u =
+//        if (u1.isValue && u2.isValue)
+//            op(u1.asInstanceOf[VValue[A]], u2.asInstanceOf[VValue[B]])
+//        else if (u2.isValue)
+//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
+//        else if (u1.isValue)
+//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
+//        else if (u1.v < u2.v)
+//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
+//        else if (u1.v > u2.v)
+//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
+//        else //if (u1.v==u2.v)
+//            mk(u1.v, app(u1.low, u2.low), app(u1.high, u2.high))
+//
+//        cache += ((u1, u2) -> u)
+//        u
+//    }
+//
+//        app(left, right)
+//    }
+//
+    public static <T> VNode<T> ite(VNode<Boolean> f, VNode<T> g, VNode<T> h) {
+        return _ite(f, g, h, new HashMap<>());
+    }
+
+    private static <T> VNode<T> _ite(VNode<Boolean> f, VNode<T> g, VNode<T> h, Map<Triple<VNode<Boolean>, VNode<T>, VNode<T>>, VNode<T>> cache) {
+        if (f == TRUE) return g;
+        if (f == FALSE) return h;
+        if (g == h) return h;
+
+        Triple<VNode<Boolean>, VNode<T>, VNode<T>> tr = new Triple<>(f, g, h);
+        if (cache.containsKey(tr))
+            return cache.get(tr);
+
+        Symbol v = f._symbol().min(g._symbol().min(h._symbol()));
+        VNode<T> t = _ite(v == f._symbol() ? f._high() : f, v == g._symbol() ? g._high() : g, v == h._symbol() ? h._high() : h, cache);
+        VNode<T> e = _ite(v == f._symbol() ? f._low() : f, v == g._symbol() ? g._low() : g, v == h._symbol() ? h._low() : h, cache);
+        if (t == e) return e;
+        VNode<T> result = mk(v, e, t);
+        cache.put(tr, result);
+        return result;
+    }
+
 
     //public API for createValue -- hashConsing
     public static <T> VNode<T> one(T x) {
         return createValue(x);
+    }
+
+
+    private static class Triple<A, B, C> {
+        private final A a;
+        private final B b;
+        private final C c;
+
+        private Triple(A a, B b, C c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public int hashCode() {
+            return a.hashCode() + b.hashCode() + c.hashCode();
+        }
+
+        public boolean equals(Object t) {
+            if (t instanceof Triple) {
+                Triple<A, B, C> that = (Triple<A, B, C>) t;
+                return this.a == that.a && this.b == that.b && this.c == that.c;
+            }
+            return false;
+        }
     }
 
 }

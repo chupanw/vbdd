@@ -38,4 +38,8 @@ public class VValue<T> extends VNodeImpl<T> {
         return super.equals(that);
     }
 
+    @Override
+    public String toString() {
+        return "One("+value+")";
+    }
 }

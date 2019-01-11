@@ -25,4 +25,10 @@ public class Symbol implements Comparable<Symbol> {
     public String getName() {
         return name;
     }
+
+    public Symbol min(Symbol that) {
+        if (this.idx<=that.idx)
+            return this;
+        return that;
+    }
 }
