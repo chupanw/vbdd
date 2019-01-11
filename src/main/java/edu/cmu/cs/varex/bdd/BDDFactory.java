@@ -1,4 +1,4 @@
-package edu.cmu.typechef.vbdd;
+package edu.cmu.cs.varex.bdd;
 
 import java.lang.ref.WeakReference;
 import java.util.*;

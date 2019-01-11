@@ -1,13 +1,10 @@
 package edu.cmu.cs.varex;
 
-import de.fosd.typechef.featureexpr.FeatureExpr;
-import de.fosd.typechef.featureexpr.bdd.BDDFeatureExpr;
-import de.fosd.typechef.featureexpr.bdd.FExprBuilder;
+
+import edu.cmu.cs.varex.fexpr.FeatureExpr;
+import edu.cmu.cs.varex.vbdd.VBDDFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.*;
 
 /**
@@ -22,7 +19,7 @@ public interface V<T> {
     T getOne();
 
     @Deprecated
-    default T getOne(@Nonnull FeatureExpr ctx) {
+    default T getOne(@Nonnull V<Boolean> ctx) {
         assert ctx != null;
         return select(ctx).getOne();
     }
@@ -39,7 +36,7 @@ public interface V<T> {
      */
     <U> V<? extends U> map(@Nonnull Function<? super T, ? extends U> fun);
 
-    <U> V<? extends U> map(@Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> fun);
+    <U> V<? extends U> map(@Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun);
 
     /**
      * select map: shorthand for x.select(ctx).map(fun)
@@ -50,23 +47,23 @@ public interface V<T> {
      * <p>
      * fun may return null.
      */
-    default <U> V<? extends U> smap(@Nonnull FeatureExpr ctx, @Nonnull Function<? super T, ? extends U> fun) {
+    default <U> V<? extends U> smap(@Nonnull V<Boolean> ctx, @Nonnull Function<? super T, ? extends U> fun) {
         assert ctx != null;
         assert fun != null;
         return this.select(ctx).map(fun);
     }
 
-    default <U> V<? extends U> smap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> fun) {
+    default <U> V<? extends U> smap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun) {
         assert ctx != null;
         assert fun != null;
         return this.select(ctx).map(fun);
     }
 
-    default <U> V<? extends U> smap(@Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> fun, @Nonnull FeatureExpr ctx) {
+    default <U> V<? extends U> smap(@Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun, @Nonnull V<Boolean> ctx) {
         return smap(ctx, fun);
     }
 
-    default <U> V<? extends U> smap(@Nonnull Function<? super T, ? extends U> fun, @Nonnull FeatureExpr ctx) {
+    default <U> V<? extends U> smap(@Nonnull Function<? super T, ? extends U> fun, @Nonnull V<Boolean> ctx) {
         return smap(ctx, fun);
     }
 
@@ -75,25 +72,25 @@ public interface V<T> {
      * to all values outside the restricted configuration space. Overloaded for the common case where
      * altFun is the identify function.
      */
-    default <U> V<? extends U> pmap(@Nonnull FeatureExpr ctx, @Nonnull Function<? super T, ? extends U> fun, @Nonnull Function<? super T, ? extends U> altFun) {
+    default <U> V<? extends U> pmap(@Nonnull V<Boolean> ctx, @Nonnull Function<? super T, ? extends U> fun, @Nonnull Function<? super T, ? extends U> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).map(fun), this.select(VCache.not(ctx)).map(altFun));
+        return VFactory.choice(ctx, this.select(ctx).map(fun), this.select(FeatureExpr.not(ctx)).map(altFun));
     }
 
-    default <U> V<? extends U> pmap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> fun, @Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> altFun) {
+    default <U> V<? extends U> pmap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun, @Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).map(fun), this.select(VCache.not(ctx)).map(altFun));
+        return VFactory.choice(ctx, this.select(ctx).map(fun), this.select(FeatureExpr.not(ctx)).map(altFun));
     }
 
-    default <U> V<? extends U> pmap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, ? extends U> fun, @Nonnull Function<? super T, ? extends U> altFun) {
+    default <U> V<? extends U> pmap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun, @Nonnull Function<? super T, ? extends U> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).map(fun), this.select(VCache.not(ctx)).map(altFun));
+        return VFactory.choice(ctx, this.select(ctx).map(fun), this.select(FeatureExpr.not(ctx)).map(altFun));
     }
 
     /**
@@ -101,18 +98,18 @@ public interface V<T> {
      */
     <U> V<? extends U> flatMap(@Nonnull Function<? super T, V<? extends U>> fun);
 
-    <U> V<? extends U> flatMap(@Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> fun);
+    <U> V<? extends U> flatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun);
 
     /**
      * see smap
      */
-    default <U> V<? extends U> sflatMap(@Nonnull FeatureExpr ctx, @Nonnull Function<? super T, V<? extends U>> fun) {
+    default <U> V<? extends U> sflatMap(@Nonnull V<Boolean> ctx, @Nonnull Function<? super T, V<? extends U>> fun) {
         assert ctx != null;
         assert fun != null;
         return this.select(ctx).flatMap(fun);
     }
 
-    default <U> V<? extends U> sflatMap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> fun) {
+    default <U> V<? extends U> sflatMap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun) {
         assert ctx != null;
         assert fun != null;
         return this.select(ctx).flatMap(fun);
@@ -121,51 +118,51 @@ public interface V<T> {
     /**
      * alternative parameter order to simplify lifting
      */
-    default <U> V<? extends U> sflatMap(@Nonnull Function<? super T, V<? extends U>> fun, @Nonnull FeatureExpr ctx) {
+    default <U> V<? extends U> sflatMap(@Nonnull Function<? super T, V<? extends U>> fun, @Nonnull V<Boolean> ctx) {
         return sflatMap(ctx, fun);
     }
 
-    default <U> V<? extends U> sflatMap(@Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> fun, @Nonnull FeatureExpr ctx) {
+    default <U> V<? extends U> sflatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun, @Nonnull V<Boolean> ctx) {
         return sflatMap(ctx, fun);
     }
 
     /**
      * see pmap
      */
-    default <U> V<? extends U> pflatMap(@Nonnull FeatureExpr ctx, @Nonnull Function<? super T, V<? extends U>> fun, @Nonnull Function<? super T, V<? extends U>> altFun) {
+    default <U> V<? extends U> pflatMap(@Nonnull V<Boolean> ctx, @Nonnull Function<? super T, V<? extends U>> fun, @Nonnull Function<? super T, V<? extends U>> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).flatMap(fun), this.select(VCache.not(ctx)).flatMap(altFun));
+        return VFactory.choice(ctx, this.select(ctx).flatMap(fun), this.select(FeatureExpr.not(ctx)).flatMap(altFun));
     }
 
-    default <U> V<? extends U> pflatMap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> fun, @Nonnull Function<? super T, ? extends U> altFun) {
+    default <U> V<? extends U> pflatMap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun, @Nonnull Function<? super T, ? extends U> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).flatMap(fun), this.select(VCache.not(ctx)).map(altFun));
+        return VFactory.choice(ctx, this.select(ctx).flatMap(fun), this.select(FeatureExpr.not(ctx)).map(altFun));
     }
 
-    default <U> V<? extends U> pflatMap(@Nonnull FeatureExpr ctx, @Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> fun, @Nonnull BiFunction<FeatureExpr, ? super T, V<? extends U>> altFun) {
+    default <U> V<? extends U> pflatMap(@Nonnull V<Boolean> ctx, @Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun, @Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> altFun) {
         assert ctx != null;
         assert fun != null;
         assert altFun != null;
-        return V.choice(ctx, this.select(ctx).flatMap(fun), this.select(VCache.not(ctx)).flatMap(altFun));
+        return VFactory.choice(ctx, this.select(ctx).flatMap(fun), this.select(FeatureExpr.not(ctx)).flatMap(altFun));
     }
 
     void foreach(@Nonnull Consumer<T> fun);
 
-    void foreach(@Nonnull BiConsumer<FeatureExpr, T> fun);
+    void foreach(@Nonnull BiConsumer<V<Boolean>, T> fun);
 
-    void foreachExp(@Nonnull BiConsumerExp<FeatureExpr, T> fun) throws Throwable;
+    void foreachExp(@Nonnull BiConsumerExp<V<Boolean>, T> fun) throws Throwable;
 
-    default void sforeach(@Nonnull FeatureExpr ctx, @Nonnull Consumer<T> fun) {
+    default void sforeach(@Nonnull V<Boolean> ctx, @Nonnull Consumer<T> fun) {
         assert ctx != null;
         assert fun != null;
         this.select(ctx).foreach(fun);
     }
 
-    default void sforeach(@Nonnull FeatureExpr ctx, @Nonnull BiConsumer<FeatureExpr, T> fun) {
+    default void sforeach(@Nonnull V<Boolean> ctx, @Nonnull BiConsumer<V<Boolean>, T> fun) {
         assert ctx != null;
         assert fun != null;
         this.select(ctx).foreach(fun);
@@ -174,15 +171,15 @@ public interface V<T> {
     /**
      * alternative parameter order to simplify lifting
      */
-    default void sforeach(@Nonnull Consumer<T> fun, @Nonnull FeatureExpr ctx) {
+    default void sforeach(@Nonnull Consumer<T> fun, @Nonnull V<Boolean> ctx) {
         sforeach(ctx, fun);
     }
 
-    default void sforeach(@Nonnull BiConsumer<FeatureExpr, T> fun, @Nonnull FeatureExpr ctx) {
+    default void sforeach(@Nonnull BiConsumer<V<Boolean>, T> fun, @Nonnull V<Boolean> ctx) {
         sforeach(ctx, fun);
     }
 
-    FeatureExpr when(@Nonnull Predicate<T> condition, boolean filterNull);
+    V<Boolean> when(@Nonnull Predicate<T> condition, boolean filterNull);
 
     /**
      * select a subconfiguration space of V
@@ -190,63 +187,17 @@ public interface V<T> {
      * @param configSpace must be the same or smaller than the configuration
      *                    space provided by this V
      */
-    V<T> select(@Nonnull FeatureExpr configSpace);
+    V<T> select(@Nonnull V<Boolean> configSpace);
 
     /**
      * reduces the configuration space of V. Resulting V covers at most the
      * provided configuration space. If it was original configuration space
      * was smaller, the smaller space remains
      */
-    V<T> reduce(@Nonnull FeatureExpr reducedConfigSpace);
+    V<T> reduce(@Nonnull V<Boolean> reducedConfigSpace);
 
-    FeatureExpr getConfigSpace();
+    V<Boolean> getConfigSpace();
 
-    @Deprecated
-    static <U> V<U> one(@Nullable U v) {
-        return one(VHelper.True(), v);
-    }
-
-    static <U> V<U> one(FeatureExpr configSpace, @Nullable U v) {
-        if (v instanceof V) {
-            return (V<U>) v;
-        } else {
-            return new One(configSpace, v);
-        }
-    }
-
-    static <U> V<? extends U> choice(@Nonnull FeatureExpr condition, @Nullable U a, @Nullable U b) {
-        assert condition != null;
-        if (VCache.isContradiction(condition))
-            return one(b);
-        else if (condition.isTautology())
-            return one(a);
-        else
-            return VImpl.choice(condition, a, b);
-    }
-
-    static <U> V<? extends U> choice(@Nonnull FeatureExpr condition, Supplier<U> a, Supplier<U> b) {
-        assert condition != null;
-        if (VCache.isContradiction(condition))
-            return one(b.get());
-        else if (condition.isTautology())
-            return one(a.get());
-        else
-            return VImpl.choice(condition, a.get(), b.get());
-    }
-
-    static <U> V<? extends U> choice(@Nonnull FeatureExpr condition, @Nonnull V<? extends U> a, @Nonnull V<? extends U> b) {
-        assert a != null;
-        //TODO should not accept null values here. requires clean initialization of variational variables with One(null) instead of null
-        if (b == null)
-            b = V.one(null);
-        assert condition != null;
-        if (!VCache.isSatisfiable(condition))
-            return b;
-        else if (condition.isTautology())
-            return a;
-        else
-            return VImpl.choice(condition, a, b);
-    }
 
     /**
      * Compares equality of the wrapped value.
@@ -254,17 +205,17 @@ public interface V<T> {
      * @param o V to be compared.
      * @return If the wrapped values are equal.
      */
-    boolean equalValue(Object o);
+//    boolean equalValue(Object o);
 
-    boolean hasThrowable();
+//    boolean hasThrowable();
 
-    V<T> simplified();
+//    V<T> simplified();
 //
 //    V<T> restrictInteractionDegree();
 //
-//    static boolean isDegreeTooHigh(FeatureExpr fe) {
+//    static boolean isDegreeTooHigh(V<Boolean> fe) {
 //        return false;
-////        List sats = ((BDDFeatureExpr) fe).bdd().allsat();
+////        List sats = ((BDDV<Boolean>) fe).bdd().allsat();
 ////        if (sats.size() == 0) throw new RuntimeException("Not satisfiable: " + fe);
 ////        for (Object sat : sats) {
 ////            int current = 0;
@@ -279,12 +230,12 @@ public interface V<T> {
 //    }
 //
 //    /**
-//     * We need a special version of FeatureExprLib to access the names of features
+//     * We need a special version of V<Boolean>Lib to access the names of features
 //     *
 //     * Ideally we should get the minimal solution from BDD directly
 //     */
-//    static String getOneLowDegreeSolution(FeatureExpr fe) {
-//        List sats = ((BDDFeatureExpr) fe).bdd().allsat();
+//    static String getOneLowDegreeSolution(V<Boolean> fe) {
+//        List sats = ((BDDV<Boolean>) fe).bdd().allsat();
 //        List<String> enabled = new LinkedList<>();
 //        for (Object sat : sats) {
 //            int current = 0;
@@ -302,8 +253,8 @@ public interface V<T> {
 //        return enabled.toString();
 //    }
 //
-//    static String getAllLowDegreeSolutions(FeatureExpr fe) {
-//        List sats = ((BDDFeatureExpr) fe).bdd().allsat();
+//    static String getAllLowDegreeSolutions(V<Boolean> fe) {
+//        List sats = ((BDDV<Boolean>) fe).bdd().allsat();
 //        List<String> enabled = new LinkedList<>();
 //        StringBuilder sb = new StringBuilder();
 //        for (Object sat : sats) {
