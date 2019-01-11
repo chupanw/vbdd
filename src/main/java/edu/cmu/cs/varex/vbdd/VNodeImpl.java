@@ -67,16 +67,13 @@ public class VNodeImpl<T> implements VNode<T> {
         return false;
     }
 
-
-//    def select(ctx: VNode[Boolean]): VNode[T] = apply[Boolean, T, T](
-//            (ctx, v) => if (ctx.value) v else NOVALUE.asInstanceOf[VValue[T]]
-//            , ctx, this)
-//
-//    def union[U >: T](that: VNode[U]): VNode[U] = apply[T, U, U](
-//            (left, right) => if (left eq NOVALUE) right else if (right eq NOVALUE) left else throw new VNodeException("attempting union of two overlapping configuration spaces")
-//      , this, that)
-//
-//
+    public VNode<T> union(VNode<T> that) {
+        return VBDDFactory.apply((left, right) -> {
+            if (left == VBDDFactory.EMPTY) return right;
+            if (right == VBDDFactory.EMPTY) return left;
+            throw new RuntimeException("attempting union of two overlapping configuration spaces");
+        }, this, that);
+    }
 //    def map[U](f: T => U): VNode[U] = VFactory.this.map(this, f)
 //
 //
@@ -110,7 +107,10 @@ public class VNodeImpl<T> implements VNode<T> {
 
     @Override
     public <U> V<? extends U> map(@Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun) {
-        throw new UnimplementedVException();
+        return VBDDFactory.mapValue(this, (x) -> {
+            V<Boolean> ctx = this.whenV((a) -> x == a, false);
+            return VBDDFactory.createValue(fun.apply(ctx, x._value()));
+        });
     }
 
     @Override
@@ -127,20 +127,27 @@ public class VNodeImpl<T> implements VNode<T> {
 
     @Override
     public void foreach(@Nonnull Consumer<T> fun) {
-        throw new UnimplementedVException();
-
+        for (VNode<T> n : new VNodeIterator<T>(this))
+            if (n._isValue() && n != VBDDFactory.EMPTY)
+                fun.accept(((VValue<T>) n)._value());
     }
 
     @Override
     public void foreach(@Nonnull BiConsumer<V<Boolean>, T> fun) {
-        throw new UnimplementedVException();
-
+        for (VNode<T> n : new VNodeIterator<T>(this))
+            if (n._isValue() && n != VBDDFactory.EMPTY) {
+                V<Boolean> ctx = this.whenV((x) -> x == n, false);
+                fun.accept(ctx, ((VValue<T>) n)._value());
+            }
     }
 
     @Override
     public void foreachExp(@Nonnull BiConsumerExp<V<Boolean>, T> fun) throws Throwable {
-        throw new UnimplementedVException();
-
+        for (VNode<T> n : new VNodeIterator<T>(this))
+            if (n._isValue() && n != VBDDFactory.EMPTY) {
+                V<Boolean> ctx = this.whenV((x) -> x == n, false);
+                fun.accept(ctx, ((VValue<T>) n)._value());
+            }
     }
 
     @Override
@@ -149,10 +156,15 @@ public class VNodeImpl<T> implements VNode<T> {
 
     }
 
+    V<Boolean> whenV(@Nonnull Predicate<VValue<T>> condition, boolean filterNull) {
+        return (V<Boolean>) VBDDFactory.mapValue(this, (x) -> x._value() == null && filterNull ? VBDDFactory.FALSE : (condition.test(x) ? VBDDFactory.TRUE : VBDDFactory.FALSE));
+
+    }
+
     @Override
     public V<T> select(@Nonnull V<Boolean> configSpace) {
         assert configSpace != null;
-        assert FeatureExpr.isTautology(FeatureExpr.implies(configSpace,getConfigSpace())):
+        assert FeatureExpr.isTautology(FeatureExpr.implies(configSpace, getConfigSpace())) :
                 "selecting under broader condition (" + configSpace + ") than the configuration space described by One (" + getConfigSpace() + ")";
 
         return reduce(configSpace);
