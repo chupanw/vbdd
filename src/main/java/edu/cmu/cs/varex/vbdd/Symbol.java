@@ -31,4 +31,8 @@ public class Symbol implements Comparable<Symbol> {
             return this;
         return that;
     }
+
+    public boolean before(Symbol that) {
+        return compareTo(that)<0;
+    }
 }

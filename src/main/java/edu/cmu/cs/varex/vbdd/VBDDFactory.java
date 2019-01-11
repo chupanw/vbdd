@@ -7,6 +7,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -236,36 +237,35 @@ public class VBDDFactory {
         return VBDDFactory.<Boolean>mk(mkSymbol(s), FALSE, TRUE);
     }
 
+    public static <A, B, C> VNode<C> applyV(BiFunction<A, B, C> op, VNode<A> left, VNode<B> right) {
+        return _apply((a, b) -> createValue(op.apply(a._value(), b._value())), left, right, new HashMap<>());
+    }
 
-    //    def apply[A, B, C](op: (VValue[A], VValue[B]) => VValue[C], left: VNode[A], right: VNode[B]): VNode[C] = {
-//        var cache: Map[(VNode[A], VNode[B]), VNode[C]] = Map()
-//
-//        def app(u1: VNode[A], u2: VNode[B]): VNode[C] = {
-//                val cached = cache.get((u1, u2))
-//        if (cached.nonEmpty)
-//            return cached.get
-//
-//        val u =
-//        if (u1.isValue && u2.isValue)
-//            op(u1.asInstanceOf[VValue[A]], u2.asInstanceOf[VValue[B]])
-//        else if (u2.isValue)
-//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
-//        else if (u1.isValue)
-//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
-//        else if (u1.v < u2.v)
-//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
-//        else if (u1.v > u2.v)
-//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
-//        else //if (u1.v==u2.v)
-//            mk(u1.v, app(u1.low, u2.low), app(u1.high, u2.high))
-//
-//        cache += ((u1, u2) -> u)
-//        u
-//    }
-//
-//        app(left, right)
-//    }
-//
+    public static <A, B, C> VNode<C> apply(BiFunction<VValue<A>, VValue<B>, VValue<C>> op, VNode<A> left, VNode<B> right) {
+        return _apply(op, left, right, new HashMap<>());
+    }
+
+    private static <A, B, C> VNode<C> _apply(BiFunction<VValue<A>, VValue<B>, VValue<C>> op, VNode<A> u1, VNode<B> u2, HashMap<Pair<VNode<A>, VNode<B>>, VNode<C>> cache) {
+        Pair<VNode<A>, VNode<B>> pair = new Pair(u1, u2);
+        if (cache.containsKey(pair)) return cache.get(pair);
+        VNode<C> result;
+        if (u1._isValue() && u2._isValue())
+            result = op.apply((VValue<A>) u1, (VValue<B>) u2);
+        else if (u2._isValue())
+            result = mk(u1._symbol(), _apply(op, u1._low(), u2, cache), _apply(op, u1._high(), u2, cache));
+        else if (u1._isValue())
+            result = mk(u2._symbol(), _apply(op, u1, u2._low(), cache), _apply(op, u1, u2._high(), cache));
+        else if (u1._symbol().before(u2._symbol()))
+            result = mk(u1._symbol(), _apply(op, u1._low(), u2, cache), _apply(op, u1._high(), u2, cache));
+        else if (u2._symbol().before(u1._symbol()))
+            result = mk(u2._symbol(), _apply(op, u1, u2._low(), cache), _apply(op, u1, u2._high(), cache));
+        else //u1.symbol = u2.symbol
+            result = mk(u1._symbol(), _apply(op, u1._low(), u2._low(), cache), _apply(op, u1._high(), u2._high(), cache));
+        cache.put(pair, result);
+        return result;
+    }
+
+
     public static <T> VNode<T> ite(VNode<Boolean> f, VNode<T> g, VNode<T> h) {
         return _ite(f, g, h, new HashMap<>());
     }
@@ -290,10 +290,31 @@ public class VBDDFactory {
 
 
     //public API for createValue -- hashConsing
-    public static <T> VNode<T> one(T x) {
+    public static <T> VValue<T> one(T x) {
         return createValue(x);
     }
 
+    private static class Pair<A, B> {
+        private final A a;
+        private final B b;
+
+        private Pair(A a, B b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        public int hashCode() {
+            return a.hashCode() + b.hashCode();
+        }
+
+        public boolean equals(Object t) {
+            if (t instanceof Pair) {
+                Pair<A, B> that = (Pair<A, B>) t;
+                return this.a == that.a && this.b == that.b;
+            }
+            return false;
+        }
+    }
 
     private static class Triple<A, B, C> {
         private final A a;
