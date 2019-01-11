@@ -1,5 +1,6 @@
-package edu.cmu.cs.varex;
+package edu.cmu.cs.varex.vbdd;
 
+import edu.cmu.cs.varex.V;
 import edu.cmu.cs.varex.vbdd.Symbol;
 import edu.cmu.cs.varex.vbdd.VBDDFactory;
 import edu.cmu.cs.varex.vbdd.VNode;
@@ -7,6 +8,8 @@ import edu.cmu.cs.varex.vbdd.VValue;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.function.Function;
 
 public class VBDDTest {
 
@@ -124,5 +127,40 @@ public class VBDDTest {
 
     }
 
+    private static <T> void printDot(V<T> v) {
+        System.out.println(((VNode<T>)v).toDot());
 
+    }
+
+    @Test public void select() {
+        VNode<Integer> x = one(1);
+        VNode<Integer> y = (VNode<Integer>) x.select(VBDDFactory.feature("a"));
+        Assert.assertEquals(one(1), y._high());
+        Assert.assertEquals(VBDDFactory.EMPTY, y._low());
+
+        VNode<Integer> z = (VNode<Integer>) y.select(VBDDFactory.feature("b"));
+        Assert.assertEquals(one(1), z._high()._high());
+        Assert.assertEquals(VBDDFactory.EMPTY, z._low());
+
+        Function<Integer,Integer> f = (v)->v+1;
+        VNode<Integer> zz = (VNode<Integer>) z.<Integer>map(f);
+        Assert.assertEquals(one(2), z._high()._high());
+        Assert.assertEquals(VBDDFactory.EMPTY, z._low());
+    }
+
+    @Test public void when() {
+        VNode<Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2));
+        Assert.assertEquals(VBDDFactory.feature("a"), x.when((a)->a==1, false));
+        V<Integer> y = x.select(VBDDFactory.feature("b"));
+        Assert.assertEquals(VBDDFactory.feature("a").select(VBDDFactory.feature("b")), y.when((a)->a==1, false));
+
+        printDot(y.when((a)->a==1, false));
+    }
+
+    @Test public void configSpace() {
+        V<Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
+        printDot(x);
+printDot(x.getConfigSpace());
+        Assert.assertEquals(VBDDFactory.feature("b"), x.getConfigSpace());
+    }
 }

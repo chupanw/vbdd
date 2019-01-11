@@ -1,17 +1,19 @@
 package edu.cmu.cs.varex.vbdd;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class VValue<T> extends VNodeImpl<T> {
 
+    @Nullable
     private final T value;
 
-    public VValue(@Nonnull T value) {
+    public VValue(@Nullable T value) {
         super(VBDDFactory.VALUEFEATURE, null, null);
         this.value=value;
         assert(value!=null);
     }
 
+    @Nullable
     public T _value() {
         return value;
     }

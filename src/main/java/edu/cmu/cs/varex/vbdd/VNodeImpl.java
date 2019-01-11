@@ -1,7 +1,9 @@
 package edu.cmu.cs.varex.vbdd;
 
 import edu.cmu.cs.varex.BiConsumerExp;
+import edu.cmu.cs.varex.UnimplementedVException;
 import edu.cmu.cs.varex.V;
+import edu.cmu.cs.varex.fexpr.FeatureExpr;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -108,52 +110,66 @@ public class VNodeImpl<T> implements VNode<T> {
 
     @Override
     public <U> V<? extends U> map(@Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun) {
-        return null;
+        throw new UnimplementedVException();
     }
 
     @Override
     public <U> V<? extends U> flatMap(@Nonnull Function<? super T, V<? extends U>> fun) {
-        return null;
+        throw new UnimplementedVException();
+
     }
 
     @Override
     public <U> V<? extends U> flatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun) {
-        return null;
+        throw new UnimplementedVException();
+
     }
 
     @Override
     public void foreach(@Nonnull Consumer<T> fun) {
+        throw new UnimplementedVException();
 
     }
 
     @Override
     public void foreach(@Nonnull BiConsumer<V<Boolean>, T> fun) {
+        throw new UnimplementedVException();
 
     }
 
     @Override
     public void foreachExp(@Nonnull BiConsumerExp<V<Boolean>, T> fun) throws Throwable {
+        throw new UnimplementedVException();
 
     }
 
     @Override
     public V<Boolean> when(@Nonnull Predicate<T> condition, boolean filterNull) {
-        return null;
+        return (V<Boolean>) this.<Boolean>map((x) -> x == null && filterNull ? false : condition.test(x));
+
     }
 
     @Override
     public V<T> select(@Nonnull V<Boolean> configSpace) {
-        return null;
+        assert configSpace != null;
+        assert FeatureExpr.isTautology(FeatureExpr.implies(configSpace,getConfigSpace())):
+                "selecting under broader condition (" + configSpace + ") than the configuration space described by One (" + getConfigSpace() + ")";
+
+        return reduce(configSpace);
     }
 
     @Override
     public V<T> reduce(@Nonnull V<Boolean> reducedConfigSpace) {
-        return null;
+        return VBDDFactory.<Boolean, T, T>apply(
+                (ctx, v) -> ctx._value() ? v : (VValue<T>) VBDDFactory.EMPTY,
+                (VNode<Boolean>) reducedConfigSpace, this
+        );
     }
 
     @Override
     public V<Boolean> getConfigSpace() {
-        return null;
+        return VBDDFactory.mapValue(this, (x) -> x != VBDDFactory.EMPTY ? VBDDFactory.TRUE : VBDDFactory.FALSE);
+
     }
 
     public String toDot() {

@@ -18,15 +18,15 @@ public class VBDDFactory {
 
     static final Symbol VALUEFEATURE = new Symbol(Integer.MAX_VALUE, "<value>");
 
-    final static VNode<?> EMPTY = new VNodeImpl(VALUEFEATURE, null, null) {
+    final static VNode<?> EMPTY = new VValue<Object>("<EMPTY>") {
         @Override
         public int hashCode() {
-            return -1;
+            return Integer.MAX_VALUE;
         }
 
         @Override
         public boolean equals(Object that) {
-            return false;
+            return that==this;
         }
 
 //        @Override
@@ -55,91 +55,18 @@ public class VBDDFactory {
     };
 
 
-    //    private val valueCache: mutable.WeakHashMap[Any, WeakReference[VValue[Any]]] = new mutable.WeakHashMap()
-//
-//    def createValue[T](x: T): VValue[T] = {
-//        val v = valueCache.get(x).flatMap(_.get)
-//        if (v.isDefined) v.get.asInstanceOf[VValue[T]]
-//        else {
-//            val xv = new Value[T](x)
-//                    valueCache.put(x, WeakReference.apply[VValue[Any]](xv))
-//            xv
-//        }
-//    }
 
     private static final WeakHashMap<Object, WeakReference<VValue<Object>>> valueCache = new WeakHashMap<>();
 
-    static <T> VValue<T> createValue(T x) {
+    public static <T> VValue<T> createValue(T x) {
         return (VValue<T>) VBDDFactory.lookupCache(valueCache, x, () -> new VValue((Object) x));
     }
 
-    //
-//
-//    def createChoice[T](ctx: VNode[Boolean], a: VNode[T], b: VNode[T]): VNode[T] = ite(ctx, a, b)
-//
-//    //    a.select(ctx) union b.select(ctx.not)
-//
-//    def apply[A, B, C](op: (VValue[A], VValue[B]) => VValue[C], left: VNode[A], right: VNode[B]): VNode[C] = {
-//        var cache: Map[(VNode[A], VNode[B]), VNode[C]] = Map()
-//
-//        def app(u1: VNode[A], u2: VNode[B]): VNode[C] = {
-//                val cached = cache.get((u1, u2))
-//        if (cached.nonEmpty)
-//            return cached.get
-//
-//        val u =
-//        if (u1.isValue && u2.isValue)
-//            op(u1.asInstanceOf[VValue[A]], u2.asInstanceOf[VValue[B]])
-//        else if (u2.isValue)
-//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
-//        else if (u1.isValue)
-//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
-//        else if (u1.v < u2.v)
-//            mk(u1.v, app(u1.low, u2), app(u1.high, u2))
-//        else if (u1.v > u2.v)
-//            mk(u2.v, app(u1, u2.low), app(u1, u2.high))
-//        else //if (u1.v==u2.v)
-//            mk(u1.v, app(u1.low, u2.low), app(u1.high, u2.high))
-//
-//        cache += ((u1, u2) -> u)
-//        u
-//    }
-//
-//        app(left, right)
-//    }
-//
-//
-//    def ite[T](f: VNode[Boolean], g: VNode[T], h: VNode[T]): VNode[T] = {
-//        var cache: Map[(VNode[Boolean], VNode[T], VNode[T]), VNode[T]] = Map()
-//
-//        def ite_(f: VNode[Boolean], g: VNode[T], h: VNode[T]): VNode[T] = {
-//        if (f eq TRUE) g
-//      else if (f eq FALSE) h
-//      else if (g eq h) h
-//        //      else if ((g eq TRUE) && (h eq FALSE)) f
-//        //      else if ((g eq FALSE) && (h eq TRUE)) f.not
-//      else {
-//            if ((g eq TRUE) && (h eq FALSE)) println("TODO missed opportunity for booleans")
-//            if ((g eq FALSE) && (h eq TRUE)) println("TODO missed opportunity for booleans")
-//            val cached = cache.get((f, g, h))
-//            if (cached.nonEmpty)
-//                return cached.get
-//
-//        import Math._
-//            val v = min(f.v, min(g.v, h.v))
-//
-//            val t = ite_(if (v == f.v) f.high else f, if (v == g.v) g.high else g, if (v == h.v) h.high else h)
-//            val e = ite_(if (v == f.v) f.low else f, if (v == g.v) g.low else g, if (v == h.v) h.low else h)
-//            if (t eq e) return e
-//            val result = mk(v, e, t)
-//            cache += ((f, g, h) -> result)
-//            result
-//        }
-//    }
-//
-//        ite_(f, g, h)
-//    }
-//
+    public static <T> VNode<T> createChoice(VNode<Boolean> ctx, VNode<T> a, VNode<T> b) {
+        return ite(ctx, a,b);
+    }
+
+
 //    def flatMap[T, U](node: VNode[T], f: T => VNode[U]): VNode[U] = flatMap[T, U](node, (_: VNode[Boolean], x: T) => f(x))
 //
 //    def flatMap[T, U](node: VNode[T], f: (VNode[Boolean], T) => VNode[U]): VNode[U] = {
@@ -155,6 +82,8 @@ public class VBDDFactory {
 //        result
 //    }
 //
+//    public static <T,U> VNode<U> flatMap(VNode<T> node,  Function<T, VNode<U>> f)
+
 //
 //
     private static final WeakHashMap<VNode<?>, WeakReference<VNode<?>>> bddTable = new WeakHashMap<>();
@@ -180,24 +109,30 @@ public class VBDDFactory {
         return (VNode<T>) lookupCache(bddTable, newNode, () -> newNode);
     }
 
-    //
-//    private val notCache: mutable.WeakHashMap[VNode[Boolean], WeakReference[VNode[Boolean]]] = new mutable.WeakHashMap()
 //    private val boolOpCache: mutable.WeakHashMap[(Boolean, VNode[Boolean], VNode[Boolean]), WeakReference[VNode[Boolean]]] = new mutable.WeakHashMap()
-//
-//    def not(bdd: VNode[Boolean]): VNode[Boolean] = lookupCache(notCache, bdd, {
-//        map[Boolean, Boolean](bdd, x => !x)
-//    })
-//
-//
-//    def map[T, U](bdd: VNode[T], f: T => U): VNode[U] = mapValue[T, U](bdd,
-//    x => if (x == NOVALUE) NOVALUE else createValue(f(x.value))
-//            )
+
+
+    private static final WeakHashMap<VNode<Boolean>, WeakReference<VNode<Boolean>>> notCache = new WeakHashMap<>();
+    private static final WeakHashMap<Pair<VNode<Boolean>,VNode<Boolean>>, WeakReference<VNode<Boolean>>> andCache = new WeakHashMap<>();
+    private static final WeakHashMap<Pair<VNode<Boolean>,VNode<Boolean>>, WeakReference<VNode<Boolean>>> orCache = new WeakHashMap<>();
+
+    public static VNode<Boolean> not(VNode<Boolean> bdd) {
+        return lookupCache(notCache, bdd, () -> map(bdd, (v) -> !v));
+    }
+
+    public static VNode<Boolean> or(VNode<Boolean> a, VNode<Boolean> b) {
+        return lookupCache(orCache, new Pair<VNode<Boolean>,VNode<Boolean>>(a, b), () -> applyV((aa,bb) -> aa || bb, a, b));
+    }
+
+    public static VNode<Boolean> and(VNode<Boolean> a, VNode<Boolean> b) {
+        return lookupCache(andCache, new Pair<VNode<Boolean>,VNode<Boolean>>(a, b), () -> applyV((aa,bb) -> aa && bb, a, b));
+    }
+
 
 
     public static <U, T> VNode<U> map(VNode<T> bdd, Function<T, U> f) {
         return mapValue(bdd, (x) -> (x == EMPTY) ? (VValue<U>) EMPTY : createValue(f.apply((T) x._value())));
     }
-//
 
     static <T, U> VNode<U> mapValue(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f) {
         return _mapValue(vbdd, f, new HashMap<VNode<T>, VNode<U>>());
@@ -214,17 +149,13 @@ public class VBDDFactory {
     }
 
 
-    //    def mapPair[T, U, V](a: VNode[T], b: VNode[U], f: (T, U) => V): VNode[V] =
-//    apply[T, U, V]((aa, bb) => createValue[V](f(aa.value, bb.value)), a, b)
-//
     private static Map<String, Symbol> symbols = new HashMap<>();
+    private static int symbolCounter = 0;
 
-    //
-//    def varNum = symbols.size
-//
     private static Symbol mkSymbol(String s) {
         if (symbols.containsKey(s)) return symbols.get(s);
-        Symbol newSymbol = new Symbol(symbols.size(), s);
+        symbolCounter++;
+        Symbol newSymbol = new Symbol(symbolCounter, s);
         symbols.put(s, newSymbol);
         return newSymbol;
     }
@@ -293,6 +224,7 @@ public class VBDDFactory {
     public static <T> VValue<T> one(T x) {
         return createValue(x);
     }
+
 
     private static class Pair<A, B> {
         private final A a;
