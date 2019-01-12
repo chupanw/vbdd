@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.LinkedList;
 import java.util.function.Function;
 
 public class VBDDTest {
@@ -166,9 +167,36 @@ public class VBDDTest {
 
     @Test
     public void foreach() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
         V<Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
 
-        x.foreach((ctx, v) -> System.out.println(FeatureExpr.toString(ctx) + " - " + v));
+        LinkedList<Util.Pair<V<Boolean>, Integer>> r = new LinkedList<Util.Pair<V<Boolean>, Integer>>();
+        x.foreach((ctx, v) -> r.add(new Util.Pair<>(ctx, v)));
+//        x.foreach((ctx, v) -> System.out.println(FeatureExpr.toString(ctx)));
+        Assert.assertEquals(new Integer(2), r.get(0).b);
+        Assert.assertEquals(new Integer(1), r.get(1).b);
+        Assert.assertEquals(FeatureExpr.and(FeatureExpr.not(a), b), r.get(0).a);
+        Assert.assertEquals(FeatureExpr.and(a, b), r.get(1).a);
 
+    }
+
+    @Test
+    public void flatMap() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
+        Function<Integer, V<? extends Integer>> id = (aa) -> this.<Integer>one(aa);
+        V<? extends Integer> xy = x.<Integer>flatMap(id);
+        Assert.assertEquals(x, xy);
+        V<? extends Integer> xx = x.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(c, this.<Integer>one(aa), this.<Integer>one(aa + 10)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(c, one(1), one(11)), VBDDFactory.ite(c, one(2), one(12))).select(b), xx);
+
+        V<? extends Integer> y = VBDDFactory.ite(c, one(1), one(11)).select(b);
+        V<? extends Integer> yx = y.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(a, this.<Integer>one(aa), this.<Integer>one(aa + 1)));
+        Assert.assertEquals(xx, yx);
+
+//        printDot(yx);
     }
 }

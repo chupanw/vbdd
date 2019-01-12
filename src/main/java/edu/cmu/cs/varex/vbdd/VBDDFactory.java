@@ -113,19 +113,19 @@ public class VBDDFactory {
 
 
     private static final WeakHashMap<VNode<Boolean>, WeakReference<VNode<Boolean>>> notCache = new WeakHashMap<>();
-    private static final WeakHashMap<Pair<VNode<Boolean>,VNode<Boolean>>, WeakReference<VNode<Boolean>>> andCache = new WeakHashMap<>();
-    private static final WeakHashMap<Pair<VNode<Boolean>,VNode<Boolean>>, WeakReference<VNode<Boolean>>> orCache = new WeakHashMap<>();
+    private static final WeakHashMap<Util.Pair<VNode<Boolean>, VNode<Boolean>>, WeakReference<VNode<Boolean>>> andCache = new WeakHashMap<>();
+    private static final WeakHashMap<Util.Pair<VNode<Boolean>, VNode<Boolean>>, WeakReference<VNode<Boolean>>> orCache = new WeakHashMap<>();
 
     public static VNode<Boolean> not(VNode<Boolean> bdd) {
         return lookupCache(notCache, bdd, () -> map(bdd, (v) -> !v));
     }
 
     public static VNode<Boolean> or(VNode<Boolean> a, VNode<Boolean> b) {
-        return lookupCache(orCache, new Pair<VNode<Boolean>,VNode<Boolean>>(a, b), () -> applyV((aa,bb) -> aa || bb, a, b));
+        return lookupCache(orCache, new Util.Pair<VNode<Boolean>, VNode<Boolean>>(a, b), () -> applyV((aa, bb) -> aa || bb, a, b));
     }
 
     public static VNode<Boolean> and(VNode<Boolean> a, VNode<Boolean> b) {
-        return lookupCache(andCache, new Pair<VNode<Boolean>,VNode<Boolean>>(a, b), () -> applyV((aa,bb) -> aa && bb, a, b));
+        return lookupCache(andCache, new Util.Pair<VNode<Boolean>, VNode<Boolean>>(a, b), () -> applyV((aa, bb) -> aa && bb, a, b));
     }
 
 
@@ -147,6 +147,7 @@ public class VBDDFactory {
         rewritten.put(vbdd, newNode);
         return newNode;
     }
+
 
 
     private static Map<String, Symbol> symbols = new HashMap<>();
@@ -176,8 +177,8 @@ public class VBDDFactory {
         return _apply(op, left, right, new HashMap<>());
     }
 
-    private static <A, B, C> VNode<C> _apply(BiFunction<VValue<A>, VValue<B>, VValue<C>> op, VNode<A> u1, VNode<B> u2, HashMap<Pair<VNode<A>, VNode<B>>, VNode<C>> cache) {
-        Pair<VNode<A>, VNode<B>> pair = new Pair(u1, u2);
+    private static <A, B, C> VNode<C> _apply(BiFunction<VValue<A>, VValue<B>, VValue<C>> op, VNode<A> u1, VNode<B> u2, HashMap<Util.Pair<VNode<A>, VNode<B>>, VNode<C>> cache) {
+        Util.Pair<VNode<A>, VNode<B>> pair = new Util.Pair(u1, u2);
         if (cache.containsKey(pair)) return cache.get(pair);
         VNode<C> result;
         if (u1._isValue() && u2._isValue())
@@ -201,12 +202,12 @@ public class VBDDFactory {
         return _ite(f, g, h, new HashMap<>());
     }
 
-    private static <T> VNode<T> _ite(VNode<Boolean> f, VNode<T> g, VNode<T> h, Map<Triple<VNode<Boolean>, VNode<T>, VNode<T>>, VNode<T>> cache) {
+    private static <T> VNode<T> _ite(VNode<Boolean> f, VNode<T> g, VNode<T> h, Map<Util.Triple<VNode<Boolean>, VNode<T>, VNode<T>>, VNode<T>> cache) {
         if (f == TRUE) return g;
         if (f == FALSE) return h;
         if (g == h) return h;
 
-        Triple<VNode<Boolean>, VNode<T>, VNode<T>> tr = new Triple<>(f, g, h);
+        Util.Triple<VNode<Boolean>, VNode<T>, VNode<T>> tr = new Util.Triple<>(f, g, h);
         if (cache.containsKey(tr))
             return cache.get(tr);
 
@@ -226,50 +227,6 @@ public class VBDDFactory {
     }
 
 
-    private static class Pair<A, B> {
-        private final A a;
-        private final B b;
 
-        private Pair(A a, B b) {
-            this.a = a;
-            this.b = b;
-        }
-
-        public int hashCode() {
-            return a.hashCode() + b.hashCode();
-        }
-
-        public boolean equals(Object t) {
-            if (t instanceof Pair) {
-                Pair<A, B> that = (Pair<A, B>) t;
-                return this.a == that.a && this.b == that.b;
-            }
-            return false;
-        }
-    }
-
-    private static class Triple<A, B, C> {
-        private final A a;
-        private final B b;
-        private final C c;
-
-        private Triple(A a, B b, C c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-        }
-
-        public int hashCode() {
-            return a.hashCode() + b.hashCode() + c.hashCode();
-        }
-
-        public boolean equals(Object t) {
-            if (t instanceof Triple) {
-                Triple<A, B, C> that = (Triple<A, B, C>) t;
-                return this.a == that.a && this.b == that.b && this.c == that.c;
-            }
-            return false;
-        }
-    }
 
 }

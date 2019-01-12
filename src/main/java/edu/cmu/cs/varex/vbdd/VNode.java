@@ -20,6 +20,8 @@ public interface VNode<T> extends V<T> {
 
     String toDot();
 
+    VNode<T> union(VNode<T> that);
+
 
 //    //exception or NonNull
 //    @Nonnull

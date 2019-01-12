@@ -1,7 +1,6 @@
 package edu.cmu.cs.varex.vbdd;
 
 import edu.cmu.cs.varex.BiConsumerExp;
-import edu.cmu.cs.varex.UnimplementedVException;
 import edu.cmu.cs.varex.V;
 import edu.cmu.cs.varex.fexpr.FeatureExpr;
 
@@ -108,21 +107,28 @@ public class VNodeImpl<T> implements VNode<T> {
     @Override
     public <U> V<? extends U> map(@Nonnull BiFunction<V<Boolean>, ? super T, ? extends U> fun) {
         return VBDDFactory.mapValue(this, (x) -> {
-            V<Boolean> ctx = this.whenV((a) -> x == a, false);
+            V<Boolean> ctx = this.whenV((a) -> x == a);
             return VBDDFactory.createValue(fun.apply(ctx, x._value()));
         });
     }
 
     @Override
     public <U> V<? extends U> flatMap(@Nonnull Function<? super T, V<? extends U>> fun) {
-        throw new UnimplementedVException();
-
+        //need to deal with ctxs because of the union trick; there might be a better implementation
+        return flatMap((ctx, v) -> fun.apply(v));
     }
 
     @Override
     public <U> V<? extends U> flatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun) {
-        throw new UnimplementedVException();
-
+        //TODO there might be potential for optimization by avoiding splitting all values and combining them through union
+        VNode<U> result = (VNode<U>) VBDDFactory.EMPTY;
+        for (VNode<T> n : new VNodeIterator<T>(this))
+            if (n._isValue() && n != VBDDFactory.EMPTY) {
+                V<Boolean> ctx = this.whenV((x) -> x == n);
+                V<? extends U> r = fun.apply(ctx, ((VValue<T>) n)._value());
+                result = result.union((VNode<U>) r.select(ctx));
+            }
+        return result;
     }
 
     @Override
@@ -136,7 +142,7 @@ public class VNodeImpl<T> implements VNode<T> {
     public void foreach(@Nonnull BiConsumer<V<Boolean>, T> fun) {
         for (VNode<T> n : new VNodeIterator<T>(this))
             if (n._isValue() && n != VBDDFactory.EMPTY) {
-                V<Boolean> ctx = this.whenV((x) -> x == n, false);
+                V<Boolean> ctx = this.whenV((x) -> x == n);
                 fun.accept(ctx, ((VValue<T>) n)._value());
             }
     }
@@ -145,7 +151,7 @@ public class VNodeImpl<T> implements VNode<T> {
     public void foreachExp(@Nonnull BiConsumerExp<V<Boolean>, T> fun) throws Throwable {
         for (VNode<T> n : new VNodeIterator<T>(this))
             if (n._isValue() && n != VBDDFactory.EMPTY) {
-                V<Boolean> ctx = this.whenV((x) -> x == n, false);
+                V<Boolean> ctx = this.whenV((x) -> x == n);
                 fun.accept(ctx, ((VValue<T>) n)._value());
             }
     }
@@ -156,8 +162,8 @@ public class VNodeImpl<T> implements VNode<T> {
 
     }
 
-    V<Boolean> whenV(@Nonnull Predicate<VValue<T>> condition, boolean filterNull) {
-        return (V<Boolean>) VBDDFactory.mapValue(this, (x) -> x._value() == null && filterNull ? VBDDFactory.FALSE : (condition.test(x) ? VBDDFactory.TRUE : VBDDFactory.FALSE));
+    V<Boolean> whenV(@Nonnull Predicate<VValue<T>> condition) {
+        return (V<Boolean>) VBDDFactory.mapValue(this, (x) -> (condition.test(x) ? VBDDFactory.TRUE : VBDDFactory.FALSE));
 
     }
 
