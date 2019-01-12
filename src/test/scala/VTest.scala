@@ -42,7 +42,7 @@ class VTest extends FunSuite {
     assert(y2 eq y2_)
 
 
-    f.printDot(f.mk(v2, y1, f.mk(v1, x1, x3)))
+    //    f.printDot(f.mk(v2, y1, f.mk(v1, x1, x3)))
 
   }
 
@@ -81,8 +81,8 @@ class VTest extends FunSuite {
     val a = f.feature("a")
     val b = f.feature("b")
 
-    f.printDot(f.createChoice(a, f.createValue(1), f.createValue(2)))
-    f.printDot(f.createChoice(b, f.createChoice(a, f.createValue(1), f.createValue(2)), f.createChoice(a, f.createValue(2), f.createValue(3))))
+    //    f.printDot(f.createChoice(a, f.createValue(1), f.createValue(2)))
+    //    f.printDot(f.createChoice(b, f.createChoice(a, f.createValue(1), f.createValue(2)), f.createChoice(a, f.createValue(2), f.createValue(3))))
     assert(f.createChoice(a, f.createValue(1), f.createValue(2)) eq f.mk(a.v, f.createValue(2), f.createValue(1)))
     assert(f.createChoice(b, f.createChoice(a, f.createValue(1), f.createValue(2)), f.createChoice(a, f.createValue(2), f.createValue(3))) eq
       f.mk(a.v, f.mk(b.v, f.createValue(3), f.createValue(2)), f.mk(b.v, f.createValue(2), f.createValue(1))))
@@ -114,14 +114,14 @@ class VTest extends FunSuite {
       f.createChoice(a, f.createValue(1), f.createValue(2)),
       f.createChoice(b, f.createValue(4), f.createValue(8)),
       _ + _)
-    f.printDot(s)
+    //    f.printDot(s)
     assert(s == f.createChoice(b, f.createChoice(a, f.createValue(5), f.createValue(6)), f.createChoice(a, f.createValue(9), f.createValue(10))))
 
     val t = f.mapPair[Int, Int, Int](
       f.createChoice(a, f.createValue(1), f.createValue(2)),
       f.createChoice(b, f.createValue(1), f.createValue(2)),
       _ + _)
-    f.printDot(t)
+    //    f.printDot(t)
     assert(t == f.createChoice(b, f.createChoice(a, f.createValue(2), f.createValue(3)), f.createChoice(a, f.createValue(3), f.createValue(4))))
   }
 
@@ -137,7 +137,7 @@ class VTest extends FunSuite {
 
     val z = x.set(a and b, 3)
     assert(z eq f.createChoice(a and b, f.createValue(3), f.createValue(1)))
-    f.printDot(z)
+    //    f.printDot(z)
   }
 
   test("ite") {
@@ -147,7 +147,7 @@ class VTest extends FunSuite {
     val b = f.feature("b")
     val c = f.feature("c")
 
-    f.printDot(f.ite(a, b, c))
+    //    f.printDot(f.ite(a, b, c))
 
     assert(f.ite(a, b, c) eq f.createChoice(a, b, c))
     assert(f.ite(a, b, c) eq ((a and b) or (a.not and c)))
@@ -170,7 +170,7 @@ class VTest extends FunSuite {
     val x = f.createChoice(b, f.createChoice(d, f.createValue(2), f.createValue(1)), f.createChoice(a, f.createValue(3), f.createValue(2)))
     val y = f.createChoice(c, f.createChoice(a, f.createValue(6), f.createValue(9)), f.createChoice(b, f.createValue(6), f.createValue(10)))
 
-    f.printDot(x.flatMap(xx => y.map(yy => xx + yy)))
+    //    f.printDot(x.flatMap(xx => y.map(yy => xx + yy)))
 
     assert(x.flatMap(xx => y.map(yy => xx + yy)) eq f.mapPair[Int, Int, Int](x, y, _ + _))
 

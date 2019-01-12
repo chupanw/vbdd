@@ -1,5 +1,10 @@
 package fosd.net.bdd
 
+/**
+  * Original Scala implementation of the VBDD library
+  *
+  **/
+
 import scala.collection.immutable.Queue
 import scala.collection.mutable
 import scala.ref.WeakReference

@@ -1,6 +1,5 @@
 package edu.cmu.cs.varex.vbdd;
 
-import edu.cmu.cs.varex.UnimplementedVException;
 import edu.cmu.cs.varex.V;
 
 import java.lang.ref.WeakReference;
@@ -13,7 +12,7 @@ import java.util.function.Supplier;
 
 public class VBDDFactory {
     public static <U> V<? extends U> choice(V<Boolean> condition, U a, U b) {
-        throw new UnimplementedVException();
+        return ite((VNode<Boolean>) condition, createValue(a), createValue(b));
     }
 
     static final Symbol VALUEFEATURE = new Symbol(Integer.MAX_VALUE, "<value>");
@@ -26,7 +25,7 @@ public class VBDDFactory {
 
         @Override
         public boolean equals(Object that) {
-            return that==this;
+            return that == this;
         }
 
 //        @Override
@@ -55,7 +54,6 @@ public class VBDDFactory {
     };
 
 
-
     private static final WeakHashMap<Object, WeakReference<VValue<Object>>> valueCache = new WeakHashMap<>();
 
     public static <T> VValue<T> createValue(T x) {
@@ -63,7 +61,7 @@ public class VBDDFactory {
     }
 
     public static <T> VNode<T> createChoice(VNode<Boolean> ctx, VNode<T> a, VNode<T> b) {
-        return ite(ctx, a,b);
+        return ite(ctx, a, b);
     }
 
 
@@ -84,7 +82,7 @@ public class VBDDFactory {
 //
 //    public static <T,U> VNode<U> flatMap(VNode<T> node,  Function<T, VNode<U>> f)
 
-//
+    //
 //
     private static final WeakHashMap<VNode<?>, WeakReference<VNode<?>>> bddTable = new WeakHashMap<>();
 
@@ -129,7 +127,6 @@ public class VBDDFactory {
     }
 
 
-
     public static <U, T> VNode<U> map(VNode<T> bdd, Function<T, U> f) {
         return mapValue(bdd, (x) -> (x == EMPTY) ? (VValue<U>) EMPTY : createValue(f.apply((T) x._value())));
     }
@@ -147,7 +144,6 @@ public class VBDDFactory {
         rewritten.put(vbdd, newNode);
         return newNode;
     }
-
 
 
     private static Map<String, Symbol> symbols = new HashMap<>();
@@ -197,6 +193,9 @@ public class VBDDFactory {
         return result;
     }
 
+    public static <T> V<T> ite_(V<Boolean> f, V<T> g, V<T> h) {
+        return ite((VNode<Boolean>) f, (VNode<T>) g, (VNode<T>) h);
+    }
 
     public static <T> VNode<T> ite(VNode<Boolean> f, VNode<T> g, VNode<T> h) {
         return _ite(f, g, h, new HashMap<>());
@@ -225,8 +224,6 @@ public class VBDDFactory {
     public static <T> VValue<T> one(T x) {
         return createValue(x);
     }
-
-
 
 
 }

@@ -137,13 +137,13 @@ public class VBDDTest {
         Assert.assertEquals(one(1), y._high());
         Assert.assertEquals(VBDDFactory.EMPTY, y._low());
 
-        VNode<Integer> z = (VNode<Integer>) y.select(VBDDFactory.feature("b"));
+        VNode<Integer> z = (VNode<Integer>) y.reduce(VBDDFactory.feature("b"));
         Assert.assertEquals(one(1), z._high()._high());
         Assert.assertEquals(VBDDFactory.EMPTY, z._low());
 
         Function<Integer, Integer> f = (v) -> v + 1;
         VNode<Integer> zz = (VNode<Integer>) z.<Integer>map(f);
-        Assert.assertEquals(one(2), z._high()._high());
+        Assert.assertEquals(one(2), zz._high()._high());
         Assert.assertEquals(VBDDFactory.EMPTY, z._low());
     }
 
@@ -154,14 +154,14 @@ public class VBDDTest {
         V<Integer> y = x.select(VBDDFactory.feature("b"));
         Assert.assertEquals(VBDDFactory.feature("a").select(VBDDFactory.feature("b")), y.when((a) -> a == 1, false));
 
-        printDot(y.when((a) -> a == 1, false));
+//        printDot(y.when((a) -> a == 1, false));
     }
 
     @Test
     public void configSpace() {
         V<Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
-        printDot(x);
-        printDot(x.getConfigSpace());
+//        printDot(x);
+//        printDot(x.getConfigSpace());
         Assert.assertEquals(VBDDFactory.feature("b"), x.getConfigSpace());
     }
 

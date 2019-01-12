@@ -171,7 +171,7 @@ public class VNodeImpl<T> implements VNode<T> {
     public V<T> select(@Nonnull V<Boolean> configSpace) {
         assert configSpace != null;
         assert FeatureExpr.isTautology(FeatureExpr.implies(configSpace, getConfigSpace())) :
-                "selecting under broader condition (" + configSpace + ") than the configuration space described by One (" + getConfigSpace() + ")";
+                "selecting under broader condition (" + FeatureExpr.toString(configSpace) + ") than the configuration space described by One (" + FeatureExpr.toString(getConfigSpace()) + ")";
 
         return reduce(configSpace);
     }
