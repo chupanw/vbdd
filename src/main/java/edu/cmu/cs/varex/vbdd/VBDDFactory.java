@@ -17,7 +17,7 @@ public class VBDDFactory {
 
     static final Symbol VALUEFEATURE = new Symbol(Integer.MAX_VALUE, "<value>");
 
-    final static VNode<?> EMPTY = new VValue<Object>("<EMPTY>") {
+    public final static VNode<?> EMPTY = new VValue<Object>("<EMPTY>") {
         @Override
         public int hashCode() {
             return Integer.MAX_VALUE;
@@ -137,10 +137,13 @@ public class VBDDFactory {
 
     private static <T, U> VNode<U> _mapValue(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f, Map<VNode<T>, VNode<U>> rewritten) {
         if (rewritten.containsKey(vbdd)) return rewritten.get(vbdd);
-        VNode<U> newNode =
-                vbdd._isValue() ?
-                        f.apply((VValue<T>) vbdd) :
-                        VBDDFactory.mk(vbdd._symbol(), _mapValue(vbdd._low(), f, rewritten), _mapValue(vbdd._high(), f, rewritten));
+        VNode<U> newNode = vbdd ==
+                VBDDFactory.EMPTY ?
+                (VNode<U>) VBDDFactory.EMPTY :
+                (
+                        vbdd._isValue() ?
+                                f.apply((VValue<T>) vbdd) :
+                                VBDDFactory.mk(vbdd._symbol(), _mapValue(vbdd._low(), f, rewritten), _mapValue(vbdd._high(), f, rewritten)));
         rewritten.put(vbdd, newNode);
         return newNode;
     }

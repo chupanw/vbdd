@@ -84,4 +84,7 @@ public class FeatureExpr {
         return result;
     }
 
+    public static V<Boolean> orNot(V<Boolean> a, V<Boolean> b) {
+        return FeatureExpr.or(a, FeatureExpr.not(b));
+    }
 }
