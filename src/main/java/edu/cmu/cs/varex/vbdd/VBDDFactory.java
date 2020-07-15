@@ -3,9 +3,7 @@ package edu.cmu.cs.varex.vbdd;
 import edu.cmu.cs.varex.V;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -133,6 +131,19 @@ public class VBDDFactory {
 
     static <T, U> VNode<U> mapValue(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f) {
         return _mapValue(vbdd, f, new HashMap<VNode<T>, VNode<U>>());
+    }
+
+    static <T, U> VNode<U> mapValueNoEmpty(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f) {
+        return _mapValueNoEmpty(vbdd, f, new HashMap<VNode<T>, VNode<U>>());
+    }
+
+    private static <T, U> VNode<U> _mapValueNoEmpty(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f, Map<VNode<T>, VNode<U>> rewritten) {
+        if (rewritten.containsKey(vbdd)) return rewritten.get(vbdd);
+        VNode<U> newNode = vbdd._isValue() ?
+                                f.apply((VValue<T>) vbdd) :
+                                VBDDFactory.mk(vbdd._symbol(), _mapValueNoEmpty(vbdd._low(), f, rewritten), _mapValueNoEmpty(vbdd._high(), f, rewritten));
+        rewritten.put(vbdd, newNode);
+        return newNode;
     }
 
     private static <T, U> VNode<U> _mapValue(VNode<T> vbdd, Function<VValue<T>, VValue<U>> f, Map<VNode<T>, VNode<U>> rewritten) {

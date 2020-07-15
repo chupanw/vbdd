@@ -6,6 +6,7 @@ import edu.cmu.cs.varex.fexpr.FeatureExpr;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.function.*;
 
 public class VNodeImpl<T> implements VNode<T> {
@@ -163,7 +164,7 @@ public class VNodeImpl<T> implements VNode<T> {
     }
 
     V<Boolean> whenV(@Nonnull Predicate<VValue<T>> condition) {
-        return (V<Boolean>) VBDDFactory.mapValue(this, (x) -> (condition.test(x) ? VBDDFactory.TRUE : VBDDFactory.FALSE));
+        return (V<Boolean>) VBDDFactory.mapValueNoEmpty(this, (x) -> (condition.test(x) ? VBDDFactory.TRUE : VBDDFactory.FALSE));
 
     }
 
