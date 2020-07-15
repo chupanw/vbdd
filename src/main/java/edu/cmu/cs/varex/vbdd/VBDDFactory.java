@@ -233,6 +233,70 @@ public class VBDDFactory {
         return result;
     }
 
+    public static <T, U> VNode<U> nITE(VNode<T> f, Map<VValue<T>, VNode<U>> replacements) {
+        if (f._isValue()) return replacements.get((VValue<T>) f);
+        if (replacements.size() == 2) {
+            HashSet<VNode<U>> valueSet = new HashSet<>(replacements.values());
+            if (valueSet.size() == 1) {
+                return valueSet.iterator().next();
+            }
+        }
+
+        Symbol v = minSymbol(f, replacements);
+        VNode<U> high, low;
+        if (v == f._symbol()) {
+            Map<VValue<T>, VNode<U>> lowReplacements = getReplacementsOf(f._low(), replacements);
+            Map<VValue<T>, VNode<U>> highReplacements = getReplacementsOf(f._high(), replacements);
+            high = nITE(f._high(), replacementsGo(v, true, highReplacements));
+            low = nITE(f._low(), replacementsGo(v, false, lowReplacements));
+        } else {
+            high = nITE(f, replacementsGo(v, true, replacements));
+            low = nITE(f, replacementsGo(v, false, replacements));
+        }
+        if (high == low) return low;
+        VNode<U> result = mk(v, low, high);
+        return result;
+    }
+
+    private static <T, U> Symbol minSymbol(VNode<T> f, Map<VValue<T>, VNode<U>> replacements) {
+        Symbol min = f._symbol();
+        for (Map.Entry<VValue<T>, VNode<U>> entry : replacements.entrySet()) {
+            min = min.min(entry.getValue()._symbol());
+        }
+        return min;
+    }
+
+    // perf: we can speed this up if we also track the parent nodes
+    private static <T, U> Map<VValue<T>, VNode<U>> getReplacementsOf(VNode<T> f, Map<VValue<T>, VNode<U>> replacements) {
+        Queue<VNode<T>> queue = new LinkedList<>();
+        queue.add(f);
+        Map<VValue<T>, VNode<U>> result = new HashMap<>();
+        while (!queue.isEmpty()) {
+            VNode<T> peek = queue.poll();
+            if (peek._isValue()) {
+                result.put((VValue<T>) peek, (peek == EMPTY ? (VNode<U>) EMPTY : replacements.get(peek)));
+            } else {
+                queue.add(f._high()); queue.add(f._low());
+            }
+        }
+        return result;
+    }
+
+    private static <T, U> Map<VValue<T>, VNode<U>> replacementsGo(Symbol v, boolean goHigh, Map<VValue<T>, VNode<U>> replacements) {
+        HashMap<VValue<T>, VNode<U>> result = new HashMap<>();
+        for (Map.Entry<VValue<T>, VNode<U>> entry : replacements.entrySet()) {
+            VNode<U> n = entry.getValue();
+            if (n._symbol() == v) {
+                if (goHigh)
+                    result.put(entry.getKey(), n._high());
+                else
+                    result.put(entry.getKey(), n._low());
+            }
+            else
+                result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
 
     //public API for createValue -- hashConsing
     public static <T> VValue<T> one(T x) {

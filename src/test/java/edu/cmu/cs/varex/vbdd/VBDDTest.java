@@ -200,4 +200,33 @@ public class VBDDTest {
 
 //        printDot(yx);
     }
+
+    @Test
+    public void flatMapNew() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
+        Function<Integer, V<? extends Integer>> id = (aa) -> this.<Integer>one(aa);
+        V<? extends Integer> xy = x.<Integer>flatMapNew(id);
+        Assert.assertEquals(x, xy);
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(c, this.<Integer>one(aa), this.<Integer>one(aa + 10)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(c, one(1), one(11)), VBDDFactory.ite(c, one(2), one(12))).select(b), xx);
+
+        V<? extends Integer> y = VBDDFactory.ite(c, one(1), one(11)).select(b);
+        V<? extends Integer> yx = y.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(a, this.<Integer>one(aa), this.<Integer>one(aa + 1)));
+        Assert.assertEquals(xx, yx);
+    }
+
+    @Test
+    public void nITE() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        HashMap<VValue<Boolean>, VNode<Integer>> replacements = new HashMap<>();
+        replacements.put(VBDDFactory.TRUE, VBDDFactory.ite(a, one(1), one(2)));
+        replacements.put(VBDDFactory.FALSE, VBDDFactory.ite(b, one(1), one(3)));
+        VNode<Integer> res = VBDDFactory.nITE(c, replacements);
+        System.out.println(res.toDot());
+    }
 }

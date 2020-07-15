@@ -120,6 +120,18 @@ public class VNodeImpl<T> implements VNode<T> {
     }
 
     @Override
+    public <U> V<? extends U> flatMapNew(@Nonnull Function<? super T, V<? extends U>> fun) {
+        HashMap<VValue<T>, VNode<U>> replacements = new HashMap<>();
+        for (VNode<T> n : new VNodeIterator<T>(this))
+            if (n._isValue() && n != VBDDFactory.EMPTY) {
+                V<? extends U> r = fun.apply(((VValue<T>) n)._value());
+                replacements.put((VValue<T>) n, (VNode<U>) r);
+            }
+        return VBDDFactory.nITE(this, replacements);
+    }
+
+
+    @Override
     public <U> V<? extends U> flatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun) {
         //TODO there might be potential for optimization by avoiding splitting all values and combining them through union
         VNode<U> result = (VNode<U>) VBDDFactory.EMPTY;

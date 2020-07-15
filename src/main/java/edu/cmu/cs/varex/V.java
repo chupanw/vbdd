@@ -97,6 +97,7 @@ public interface V<T> {
      * @param fun may not return null, but One(null)
      */
     <U> V<? extends U> flatMap(@Nonnull Function<? super T, V<? extends U>> fun);
+    <U> V<? extends U> flatMapNew(@Nonnull Function<? super T, V<? extends U>> fun);
 
     <U> V<? extends U> flatMap(@Nonnull BiFunction<V<Boolean>, ? super T, V<? extends U>> fun);
 
