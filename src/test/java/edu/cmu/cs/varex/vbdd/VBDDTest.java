@@ -6,8 +6,10 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 
 public class VBDDTest {
@@ -161,9 +163,11 @@ public class VBDDTest {
     @Test
     public void configSpace() {
         V<Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
-//        printDot(x);
-//        printDot(x.getConfigSpace());
-        Assert.assertEquals(VBDDFactory.feature("b"), x.getConfigSpace());
+        V<Integer> y = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2));
+        printDot(y.getConfigSpace());
+        printDot(x.getConfigSpace());
+        Assert.assertEquals(VBDDFactory.feature("b").select(VBDDFactory.feature("b")), x.getConfigSpace());
+        Assert.assertNotEquals(x.getConfigSpace(),y.getConfigSpace());
     }
 
     @Test
@@ -228,5 +232,127 @@ public class VBDDTest {
         replacements.put(VBDDFactory.FALSE, VBDDFactory.ite(b, one(1), one(3)));
         VNode<Integer> res = VBDDFactory.nITE(c, replacements);
         System.out.println(res.toDot());
+    }
+
+    @Test
+    public void flatMap1() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2)).select(VBDDFactory.feature("b"));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(c, this.<Integer>one(aa + 5), this.<Integer>one(aa * 10)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(c, one(6), one(10)), VBDDFactory.ite(c, one(7), one(20))).select(b), xx);
+        printDot(xx);
+    }
+
+    @Test
+    public void flatMap2() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(b, this.<Integer>one(aa + 5), this.<Integer>one(aa * 10)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(b, one(6), one(10)), VBDDFactory.ite(b, one(7), one(20))), xx);
+    }
+
+    @Test
+    public void flatMapOrdered() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("b"), one(1), one(2)).select(VBDDFactory.feature("c"));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(a, this.<Integer>one(aa + 5), this.<Integer>one(aa * 10)));
+        String[] ordering = {"a","b", "c", "<value>"};
+        List<String> testOrder = new ArrayList<String>();
+
+        for (VNode<Integer> n : new VNodeIterator<Integer>((VNode<Integer>) xx))
+            if(!testOrder.contains(n._symbol().getName())) {
+                testOrder.add(n._symbol().getName());
+            }
+        Assert.assertArrayEquals(ordering,testOrder.toArray());
+        for(int i = 0; i <4; i++) {
+            System.out.println(ordering[i] + " " + testOrder.get(i));
+        }
+
+    }
+
+    @Test
+    public void flatMapReduced() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Boolean> x = VBDDFactory.ite(VBDDFactory.feature("a"),VBDDFactory.ite(b, one(true), one(true)),VBDDFactory.ite(b, one(false), one(true)));
+        V<? extends Boolean> xx = x.<Boolean>flatMapNew((aa) -> VBDDFactory.<Boolean>ite(c, this.<Boolean>one(!aa) , this.<Boolean>one(aa )));
+
+        List<String> testReduced = new ArrayList<String>();
+        String[] reducedLeafNodes = {"One(true)", "One(false)"};
+        for (VNode<Boolean> n : new VNodeIterator<Boolean>((VNode<Boolean>) xx))
+            if(n._isValue()) {
+                testReduced.add(n.toString());
+            }
+        Assert.assertEquals(testReduced.size(),2);
+        Assert.assertArrayEquals(testReduced.toArray(),reducedLeafNodes);
+    }
+
+    @Test
+    public void flatMapBoolean() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Boolean> x = VBDDFactory.ite(VBDDFactory.feature("a"),VBDDFactory.ite(b, one(true), one(true)),VBDDFactory.ite(b, one(false), one(true)));
+        V<? extends Boolean> xx = x.<Boolean>flatMapNew((aa) -> VBDDFactory.<Boolean>ite(c, this.<Boolean>one(!aa) , this.<Boolean>one(aa )));
+        printDot(xx);
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(b, VBDDFactory.ite(c, one(false), one(true)), VBDDFactory.ite(c, one(false), one(true))), VBDDFactory.ite(b, VBDDFactory.ite(c, one(true), one(false)), VBDDFactory.ite(c, one(false), one(true)))), xx);
+    }
+
+    @Test
+    public void flatMapStrings() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        V<? extends String> x = VBDDFactory.ite(VBDDFactory.feature("a"), one("Sleep"), one("Work"));
+        V<? extends String> xx = x.<String>flatMapNew((aa) -> VBDDFactory.<String>ite(b, this.<String>one(aa + " Now!"), this.<String>one(aa + " Later!")));
+        printDot(xx);
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(b, one("Sleep Now!"), one("Sleep Later!")), VBDDFactory.ite(b, one("Work Now!"), one("Work Later!"))), xx);
+    }
+
+    @Test
+    public void flatMap3Attributes() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(a, VBDDFactory.ite(b,  one(3), one(2)),  VBDDFactory.ite(b, one(4), one(5)));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(c, one(aa), this.<Integer>one(aa + 2)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(b, VBDDFactory.ite(c, one(3), one(5)), VBDDFactory.ite(c, one(2), one(4))), VBDDFactory.ite(b, VBDDFactory.ite(c, one(4), one(6)), VBDDFactory.ite(c, one(5), one(7)))), xx);
+        printDot(xx);
+    }
+
+    @Test
+    public void flatMap2Attributes() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        V<? extends Integer> x = VBDDFactory.ite(a, one(2), one(4));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(b, one(aa), this.<Integer>one(aa + 2)));
+        Assert.assertEquals(VBDDFactory.ite(a, VBDDFactory.ite(b, one(2), one(4)), VBDDFactory.ite(b, one(4), one(6))), xx);
+        printDot(xx);
+    }
+
+    @Test
+    public void compareToOld1() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        V<? extends Integer> x = VBDDFactory.ite(a, one(2), one(4));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(b, one(aa), this.<Integer>one(aa + 2)));
+        Assert.assertEquals(x.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(b, one(aa), this.<Integer>one(aa + 2))), xx);
+        printDot(xx);
+    }
+
+    @Test
+    public void compareToOld2() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        V<? extends Integer> x = VBDDFactory.ite(a, VBDDFactory.ite(b,  one(3), one(2)),  VBDDFactory.ite(b, one(4), one(5)));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(c, one(aa), this.<Integer>one(aa + 2)));
+        Assert.assertEquals(x.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(c, one(aa), this.<Integer>one(aa + 2))), xx);
+        printDot(xx);
     }
 }

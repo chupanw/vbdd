@@ -1,0 +1,79 @@
+[0m[[0m[0mdebug[0m] [0m[0mjavaOptions: Vector(-ea)[0m
+[0m[[0m[0mdebug[0m] [0m[0mForking tests - parallelism = false[0m
+[0m[[0m[0mdebug[0m] [0m[0mCreate a single-thread test executor[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunner for org.scalatest.tools.Framework produced 1 initial tasks for 1 tests.[0m
+[0m[[0m[0mdebug[0m] [0m[0m  Running TaskDef(fosd.net.bdd.VTest, sbt.ForkMain$SubclassFingerscan@2ce2df8c, false, [SuiteSelector])[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mVTest:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- mk[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- union[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- select[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- choice[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- map[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- mapPair[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- set[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- ite[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- flatMap[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0m    Produced 0 nested tasks and 9 events.[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunner for com.novocode.junit.JUnitFramework produced 2 initial tasks for 2 tests.[0m
+[0m[[0m[0mdebug[0m] [0m[0m  Running TaskDef(edu.cmu.cs.varex.vbdd.VBDDTest, sbt.ForkMain$AnnotatedFingerscan@1553421b, false, [SuiteSelector])[0m
+[0m[[0m[0mdebug[0m] [0m[0m[34mTest run started[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mflatMapNew[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mflatMapNew[0m finished, took 0.034 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mselect[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mselect[0m finished, took 0.003 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mflatMap[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mflatMap[0m finished, took 0.01 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mforeach[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mforeach[0m finished, took 0.013 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mite[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mite[0m finished, took 0.058 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mmap[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mmap[0m finished, took 0.004 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mnITE[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mnITE[0m finished, took 0.003 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mwhen[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mwhen[0m finished, took 0.005 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mconfigSpace[0m started[0m
+[0m[[0m[31merror[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[31mconfigSpace[0m failed: expected:<edu.cmu.cs.varex.vbdd.VNodeImpl@117a2> but was:<edu.cmu.cs.varex.vbdd.VNodeImpl@800081b8>, took 0.012 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mconfigSpace[0m finished, took 0.021 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mapply[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mapply[0m finished, took 0.009 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mcreateFeature[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mcreateFeature[0m finished, took 0.006 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mcreateValues[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.vbdd.[33mVBDDTest[0m.[36mcreateValues[0m finished, took 0.001 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0m[34mTest run finished: [0m[31m1 failed[0m[34m, [0m[34m0 ignored[0m[34m, 12 total, 0.224s[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0m    Produced 0 nested tasks and 12 events.[0m
+[0m[[0m[0mdebug[0m] [0m[0m  Running TaskDef(edu.cmu.cs.varex.VImplTest, sbt.ForkMain$AnnotatedFingerscan@316f11c4, false, [SuiteSelector])[0m
+[0m[[0m[0mdebug[0m] [0m[0m[34mTest run started[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestVFold[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestVFold[0m finished, took 0.025 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestFlatMap[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestFlatMap[0m finished, took 0.005 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestPMap[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestPMap[0m finished, took 0.007 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestSMap[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestSMap[0m finished, took 0.01 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestVFoldUntil[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestVFoldUntil[0m finished, took 0.013 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestSimplification[0m started[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestSimplification[0m finished, took 0.0 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestConfigSpaces[0m started[0m
+[0m[[0m[31merror[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[31mtestConfigSpaces[0m failed: expected:<edu.cmu.cs.varex.vbdd.VNodeImpl@800081ba> but was:<edu.cmu.cs.varex.vbdd.VNodeImpl@117a4>, took 0.001 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0mTest edu.cmu.cs.varex.[33mVImplTest[0m.[36mtestConfigSpaces[0m finished, took 0.002 sec[0m
+[0m[[0m[0mdebug[0m] [0m[0m[34mTest run finished: [0m[31m1 failed[0m[34m, [0m[34m0 ignored[0m[34m, 7 total, 0.08s[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0m    Produced 0 nested tasks and 7 events.[0m
+[0m[[0m[0minfo[0m] [0m[0mScalaTest[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mRun completed in 12 seconds, 39 milliseconds.[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mTotal number of tests run: 9[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mSuites: completed 1, aborted 0[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mTests: succeeded 9, failed 0, canceled 0, ignored 0, pending 0[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mAll tests passed.[0m[0m
+[0m[[0m[0mdebug[0m] [0m[0mSummary for JUnit not available.[0m
+[0m[[0m[31merror[0m] [0m[0mFailed: Total 28, Failed 2, Errors 0, Passed 26[0m
+[0m[[0m[0mdebug[0m] [0m[0mPassed tests:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	fosd.net.bdd.VTest[0m
+[0m[[0m[31merror[0m] [0m[0mFailed tests:[0m
+[0m[[0m[31merror[0m] [0m[0m	edu.cmu.cs.varex.VImplTest[0m
+[0m[[0m[31merror[0m] [0m[0m	edu.cmu.cs.varex.vbdd.VBDDTest[0m
+[0m[[0m[31merror[0m] [0m[0m(Test / [31mtest[0m) sbt.TestsFailedException: Tests unsuccessful[0m

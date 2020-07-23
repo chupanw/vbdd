@@ -2,7 +2,7 @@ name := "vbdd"
 organization := "edu.cmu.cs.varex"
 version := "0.2.0"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.12"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
