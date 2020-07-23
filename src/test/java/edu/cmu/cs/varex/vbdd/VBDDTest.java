@@ -235,7 +235,7 @@ public class VBDDTest {
     }
 
     @Test
-    public void flatMap1() {
+    public void flatMapOriginal1() {
         VNode<Boolean> a = VBDDFactory.feature("a");
         VNode<Boolean> b = VBDDFactory.feature("b");
         VNode<Boolean> c = VBDDFactory.feature("c");
@@ -246,7 +246,7 @@ public class VBDDTest {
     }
 
     @Test
-    public void flatMap2() {
+    public void flatMapOriginal2() {
         VNode<Boolean> a = VBDDFactory.feature("a");
         VNode<Boolean> b = VBDDFactory.feature("b");
         V<? extends Integer> x = VBDDFactory.ite(VBDDFactory.feature("a"), one(1), one(2));
@@ -353,6 +353,19 @@ public class VBDDTest {
         V<? extends Integer> x = VBDDFactory.ite(a, VBDDFactory.ite(b,  one(3), one(2)),  VBDDFactory.ite(b, one(4), one(5)));
         V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(c, one(aa), this.<Integer>one(aa + 2)));
         Assert.assertEquals(x.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(c, one(aa), this.<Integer>one(aa + 2))), xx);
+        printDot(xx);
+    }
+
+    @Test
+    public void manyAttributes() {
+        VNode<Boolean> a = VBDDFactory.feature("a");
+        VNode<Boolean> b = VBDDFactory.feature("b");
+        VNode<Boolean> c = VBDDFactory.feature("c");
+        VNode<Boolean> d = VBDDFactory.feature("d");
+        VNode<Boolean> e = VBDDFactory.feature("e");
+        V<? extends Integer> x = VBDDFactory.ite(a, VBDDFactory.ite(b,  VBDDFactory.ite(c,  VBDDFactory.ite(d,  one(3), one(2)), VBDDFactory.ite(d,  one(3), one(2))), VBDDFactory.ite(c,  VBDDFactory.ite(d,  one(3), one(2)), VBDDFactory.ite(d,  one(3), one(2)))),  VBDDFactory.ite(b,  VBDDFactory.ite(c,  VBDDFactory.ite(d,  one(3), one(2)), VBDDFactory.ite(d,  one(3), one(2))), VBDDFactory.ite(c,  VBDDFactory.ite(d,  one(6), one(7)), VBDDFactory.ite(d,  one(8), one(9)))));
+        V<? extends Integer> xx = x.<Integer>flatMapNew((aa) -> VBDDFactory.<Integer>ite(e, one(aa), this.<Integer>one(aa + 2)));
+        Assert.assertEquals(x.<Integer>flatMap((aa) -> VBDDFactory.<Integer>ite(e, one(aa), this.<Integer>one(aa + 2))), xx);
         printDot(xx);
     }
 }
