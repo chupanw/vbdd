@@ -276,7 +276,7 @@ public class VBDDFactory {
             if (peek._isValue()) {
                 result.put((VValue<T>) peek, (peek == EMPTY ? (VNode<U>) EMPTY : replacements.get(peek)));
             } else {
-                queue.add(f._high()); queue.add(f._low());
+                queue.add(peek._high()); queue.add(peek._low());
             }
         }
         return result;
