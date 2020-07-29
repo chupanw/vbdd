@@ -127,7 +127,7 @@ public class VNodeImpl<T> implements VNode<T> {
                 V<? extends U> r = fun.apply(((VValue<T>) n)._value());
                 replacements.put((VValue<T>) n, (VNode<U>) r);
             }
-        return VBDDFactory.nITE(this, replacements);
+        return VBDDFactory.nITE(this, replacements, new HashMap<>());
     }
 
 

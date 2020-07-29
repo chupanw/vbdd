@@ -233,7 +233,7 @@ public class VBDDFactory {
         return result;
     }
 
-    public static <T, U> VNode<U> nITE(VNode<T> f, Map<VValue<T>, VNode<U>> replacements) {
+    public static <T, U> VNode<U> nITE(VNode<T> f, Map<VValue<T>, VNode<U>> replacements, Map<Util.Pair<VNode<T>, Map<VValue<T>, VNode<U>>>, VNode<U>> cache) {
         if (f._isValue()) return replacements.get((VValue<T>) f);
         if (replacements.size() == 2) {
             HashSet<VNode<U>> valueSet = new HashSet<>(replacements.values());
@@ -242,19 +242,24 @@ public class VBDDFactory {
             }
         }
 
+        Util.Pair<VNode<T>, Map<VValue<T>, VNode<U>>> pair = new Util.Pair<>(f, replacements);
+        if (cache.containsKey(pair))
+            return cache.get(pair);
+
         Symbol v = minSymbol(f, replacements);
         VNode<U> high, low;
         if (v == f._symbol()) {
             Map<VValue<T>, VNode<U>> lowReplacements = getReplacementsOf(f._low(), replacements);
             Map<VValue<T>, VNode<U>> highReplacements = getReplacementsOf(f._high(), replacements);
-            high = nITE(f._high(), replacementsGo(v, true, highReplacements));
-            low = nITE(f._low(), replacementsGo(v, false, lowReplacements));
+            high = nITE(f._high(), replacementsGo(v, true, highReplacements), cache);
+            low = nITE(f._low(), replacementsGo(v, false, lowReplacements), cache);
         } else {
-            high = nITE(f, replacementsGo(v, true, replacements));
-            low = nITE(f, replacementsGo(v, false, replacements));
+            high = nITE(f, replacementsGo(v, true, replacements), cache);
+            low = nITE(f, replacementsGo(v, false, replacements), cache);
         }
         if (high == low) return low;
         VNode<U> result = mk(v, low, high);
+        cache.put(pair, result);
         return result;
     }
 

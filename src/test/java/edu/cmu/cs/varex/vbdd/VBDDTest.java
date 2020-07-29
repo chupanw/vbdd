@@ -230,7 +230,7 @@ public class VBDDTest {
         HashMap<VValue<Boolean>, VNode<Integer>> replacements = new HashMap<>();
         replacements.put(VBDDFactory.TRUE, VBDDFactory.ite(a, one(1), one(2)));
         replacements.put(VBDDFactory.FALSE, VBDDFactory.ite(b, one(1), one(3)));
-        VNode<Integer> res = VBDDFactory.nITE(c, replacements);
+        VNode<Integer> res = VBDDFactory.nITE(c, replacements, new HashMap<>());
         System.out.println(res.toDot());
     }
 
